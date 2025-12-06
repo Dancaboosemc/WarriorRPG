@@ -24,6 +24,10 @@ public:
 	
 protected:
 
+	//~Begin APwan Interface
+	virtual void PossessedBy(AController* NewController) override;
+	//~End APwan Interface
+
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
 
