@@ -45,12 +45,12 @@ inline void UWarriorInputComponent::BindAbilityInputAction(const UDataAsset_Inpu
 {
 	checkf(InInputConfig, TEXT("Input Config is null, cannot proceed with binding"));
 
-	for (const FWarriorInputActionConfig* AbilityInputActionConfig : InInputConfig->AbilityInputActions)
+	for (const FWarriorInputActionConfig& AbilityInputActionConfig : InInputConfig->AbilityInputActions)
 	{
-		if (!AbilityInputActionConfig->IsVaild()) continue;
+		if (!AbilityInputActionConfig.IsVaild()) continue;
 
-		BindAction(AbilityInputActionConfig->InputAction, ETriggerEvent::Started, ContextObject, InputPressedFunc, AbilityInputActionConfig->InputTag);
-		BindAction(AbilityInputActionConfig->InputAction, ETriggerEvent::Completed, ContextObject, InputReleasedFunc, AbilityInputActionConfig->InputTag);
+		BindAction(AbilityInputActionConfig.InputAction, ETriggerEvent::Started, ContextObject, InputPressedFunc, AbilityInputActionConfig.InputTag);
+		BindAction(AbilityInputActionConfig.InputAction, ETriggerEvent::Completed, ContextObject, InputReleasedFunc, AbilityInputActionConfig.InputTag);
 
 	}
 }
