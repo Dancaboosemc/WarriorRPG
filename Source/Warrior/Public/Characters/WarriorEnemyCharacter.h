@@ -19,10 +19,18 @@ public:
 
 	AWarriorEnemyCharacter();
 
-private:
+protected:
+
+	//~Begin APwan Interface
+	virtual void PossessedBy(AController* NewController) override;
+	//~End APwan Interface
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))
 	UEnemyCombatComponent* EnemyCombatComponent;
+
+private:
+
+	void InitEnemyStartUpData();
 
 public:
 

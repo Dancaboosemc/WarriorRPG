@@ -6,6 +6,7 @@
 #include "DataAssets/StartupData/DataAsset_StartupDataBase.h"
 #include "DataAsset_EnemyStartupData.generated.h"
 
+class UWarriorEnemyGameplayAbility;
 /**
  * 
  */
@@ -14,4 +15,10 @@ class WARRIOR_API UDataAsset_EnemyStartupData : public UDataAsset_StartupDataBas
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void GiveToAbilitySystemComponent(UWarriorAbilitySystemComponent* InASCToGive, int32 ApplyLevel = 1) override;
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "StartUpData")
+	TArray< TSubclassOf < UWarriorEnemyGameplayAbility > > EnemyCombatAbilities;
 };
