@@ -73,9 +73,9 @@ void AWarriorHeroCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 void AWarriorHeroCharacter::BeginPlay()
 {
-	{
-		Super::BeginPlay();
-	};
+	Super::BeginPlay();
+
+
 }
 
 void AWarriorHeroCharacter::Input_Move(const FInputActionValue& InputActionValue)
