@@ -24,6 +24,10 @@ class WARRIOR_API AWarriorHeroCharacter : public AWarriorCharacterBase
 public:
 
 	AWarriorHeroCharacter();
+
+	//~Begin IPawnCombatInterface Interface
+	virtual UPawnCombatComponent* GetPawnCombatComponent() const override;
+	//~End IPawnCombatInterface Interface
 	
 protected:
 
@@ -63,5 +67,4 @@ private:
 public:
 
 	FORCEINLINE UHeroCombatComponent* GetHeroCombatComponent() const { return HeroCombatComponent; }
-
 };
