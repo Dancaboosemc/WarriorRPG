@@ -31,7 +31,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Warrior|Ability")
 	FGameplayEffectSpecHandle MakeHeroDamageEffectSpecHandle(TSubclassOf<UGameplayEffect> EffectClass, float InWeaponBaseDamage, 
-		FGameplayTag CurrentAttackTypeTag, int32 CurrentComboCount);
+		FGameplayTag CurrentAttackTypeTag, int32 InUsedComboCount);
 
 private: 
 
