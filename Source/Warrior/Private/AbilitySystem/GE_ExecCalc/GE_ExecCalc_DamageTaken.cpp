@@ -5,14 +5,18 @@
 #include "AbilitySystem/WarriorAttributeSet.h"
 #include "WarriorGameplayTags.h"
 
+#include "DebugHelper.h"
+
 struct FWarriorDamageCapture
 {
 	DECLARE_ATTRIBUTE_CAPTUREDEF(AttackPower)
 	DECLARE_ATTRIBUTE_CAPTUREDEF(DefensePower)
+	DECLARE_ATTRIBUTE_CAPTUREDEF(DamageTaken)
 	FWarriorDamageCapture()
 	{
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UWarriorAttributeSet, AttackPower, Source, false)
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UWarriorAttributeSet, DefensePower, Target, false)
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UWarriorAttributeSet, DamageTaken, Target, false)
 	}
 };
 
@@ -26,6 +30,7 @@ UGE_ExecCalc_DamageTaken::UGE_ExecCalc_DamageTaken()
 {
 	RelevantAttributesToCapture.Add(GetWarriorDamageCapture().AttackPowerDef);
 	RelevantAttributesToCapture.Add(GetWarriorDamageCapture().DefensePowerDef);
+	RelevantAttributesToCapture.Add(GetWarriorDamageCapture().DamageTakenDef);
 }
 
 void UGE_ExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
@@ -38,21 +43,58 @@ void UGE_ExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCusto
 
 	float SourceAttackPower = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetWarriorDamageCapture().AttackPowerDef, EvaluateParameters, SourceAttackPower);
+	Debug::print(TEXT("SourceAttackPower"), SourceAttackPower, FColor::Green);
 
 	float BaseDamage = 0.f;
 	int32 UsedLightAttackComboCount = 0, UsedHeavyAttackComboCount = 0;
 	for (const TPair<FGameplayTag, float>& TagMagnitued : EffectSpec.SetByCallerTagMagnitudes)
 	{
 		if (TagMagnitued.Key.MatchesTagExact(WarriorGameplayTags::Shared_SetByCaller_BaseDamage))
+		{
 			BaseDamage = TagMagnitued.Value;
-
+			Debug::print(TEXT("BaseDamage"), BaseDamage, FColor::Green);
+		}
 		if (TagMagnitued.Key.MatchesTagExact(WarriorGameplayTags::Player_SetByCaller_AttackType_Light))
+		{
 			UsedLightAttackComboCount = TagMagnitued.Value;
-
+			Debug::print(TEXT("UsedLightAttackComboCount"), UsedLightAttackComboCount, FColor::Green);
+		}
 		if (TagMagnitued.Key.MatchesTagExact(WarriorGameplayTags::Player_SetByCaller_AttackType_Heavy))
+		{
 			UsedHeavyAttackComboCount = TagMagnitued.Value;
+			Debug::print(TEXT("UsedHeavyAttackComboCount"), UsedHeavyAttackComboCount, FColor::Green);
+		}
 	}
 
-	float SourceDefensePower = 0.f;
-	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetWarriorDamageCapture().DefensePowerDef, EvaluateParameters, SourceDefensePower);
+	float TargetDefensePower = 0.f;
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetWarriorDamageCapture().DefensePowerDef, EvaluateParameters, TargetDefensePower);
+	Debug::print(TEXT("TargetDefensePower"), TargetDefensePower, FColor::Green);
+
+
+	if(UsedLightAttackComboCount != 0)
+	{
+		const float DamageIncreasePercentLight = (UsedLightAttackComboCount - 1) * .05 + 1.f;
+
+		BaseDamage *= DamageIncreasePercentLight;
+		Debug::print(TEXT("BaseDamage"), BaseDamage, FColor::Green);
+
+	}
+
+	if (UsedHeavyAttackComboCount != 0)
+	{
+		const float DamageIncreasePercentHeavy = UsedHeavyAttackComboCount * .15 + 1.f;
+
+		BaseDamage *= DamageIncreasePercentHeavy;
+		Debug::print(TEXT("BaseDamage"), BaseDamage, FColor::Green);
+
+	}
+
+	const float FinalDamageDone = BaseDamage * SourceAttackPower / TargetDefensePower;
+	Debug::print(TEXT("FinalDamageDone"), FinalDamageDone, FColor::Green);
+
+
+	if (FinalDamageDone > 0.f)
+	{
+		OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(GetWarriorDamageCapture().DamageTakenProperty, EGameplayModOp::Override, FinalDamageDone));
+	}
 }
