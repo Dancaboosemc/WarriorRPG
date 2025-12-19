@@ -43,7 +43,6 @@ void UGE_ExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCusto
 
 	float SourceAttackPower = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetWarriorDamageCapture().AttackPowerDef, EvaluateParameters, SourceAttackPower);
-	Debug::print(TEXT("SourceAttackPower"), SourceAttackPower, FColor::Green);
 
 	float BaseDamage = 0.f;
 	int32 UsedLightAttackComboCount = 0, UsedHeavyAttackComboCount = 0;
@@ -52,47 +51,33 @@ void UGE_ExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCusto
 		if (TagMagnitued.Key.MatchesTagExact(WarriorGameplayTags::Shared_SetByCaller_BaseDamage))
 		{
 			BaseDamage = TagMagnitued.Value;
-			Debug::print(TEXT("BaseDamage"), BaseDamage, FColor::Green);
 		}
 		if (TagMagnitued.Key.MatchesTagExact(WarriorGameplayTags::Player_SetByCaller_AttackType_Light))
 		{
 			UsedLightAttackComboCount = TagMagnitued.Value;
-			Debug::print(TEXT("UsedLightAttackComboCount"), UsedLightAttackComboCount, FColor::Green);
 		}
 		if (TagMagnitued.Key.MatchesTagExact(WarriorGameplayTags::Player_SetByCaller_AttackType_Heavy))
 		{
 			UsedHeavyAttackComboCount = TagMagnitued.Value;
-			Debug::print(TEXT("UsedHeavyAttackComboCount"), UsedHeavyAttackComboCount, FColor::Green);
 		}
 	}
 
 	float TargetDefensePower = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetWarriorDamageCapture().DefensePowerDef, EvaluateParameters, TargetDefensePower);
-	Debug::print(TEXT("TargetDefensePower"), TargetDefensePower, FColor::Green);
-
 
 	if(UsedLightAttackComboCount != 0)
 	{
 		const float DamageIncreasePercentLight = (UsedLightAttackComboCount - 1) * .05 + 1.f;
-
 		BaseDamage *= DamageIncreasePercentLight;
-		Debug::print(TEXT("BaseDamage"), BaseDamage, FColor::Green);
-
 	}
 
 	if (UsedHeavyAttackComboCount != 0)
 	{
 		const float DamageIncreasePercentHeavy = UsedHeavyAttackComboCount * .15 + 1.f;
-
 		BaseDamage *= DamageIncreasePercentHeavy;
-		Debug::print(TEXT("BaseDamage"), BaseDamage, FColor::Green);
-
 	}
 
 	const float FinalDamageDone = BaseDamage * SourceAttackPower / TargetDefensePower;
-	Debug::print(TEXT("FinalDamageDone"), FinalDamageDone, FColor::Green);
-
-
 	if (FinalDamageDone > 0.f)
 	{
 		OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(GetWarriorDamageCapture().DamageTakenProperty, EGameplayModOp::Override, FinalDamageDone));
