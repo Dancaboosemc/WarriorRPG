@@ -3,6 +3,7 @@
 
 #include "AbilitySystem/GE_ExecCalc/GE_ExecCalc_DamageTaken.h"
 #include "AbilitySystem/WarriorAttributeSet.h"
+#include "WarriorGameplayTags.h"
 
 struct FWarriorDamageCapture
 {
@@ -23,11 +24,35 @@ static const FWarriorDamageCapture& GetWarriorDamageCapture()
 
 UGE_ExecCalc_DamageTaken::UGE_ExecCalc_DamageTaken()
 {
-	/*Slow way of doing capture*/
-	//FProperty* AttackPowerPorperty = FindFieldChecked<FProperty>(UWarriorAttributeSet::StaticClass(), GET_MEMBER_NAME_CHECKED(UWarriorAttributeSet, AttackPower));
-	//FGameplayEffectAttributeCaptureDefinition AttackPowerCaptureDefinition(AttackPowerPorperty, EGameplayEffectAttributeCaptureSource::Source, false);
-	//RelevantAttributesToCapture.Add(AttackPowerCaptureDefinition);
-
 	RelevantAttributesToCapture.Add(GetWarriorDamageCapture().AttackPowerDef);
 	RelevantAttributesToCapture.Add(GetWarriorDamageCapture().DefensePowerDef);
+}
+
+void UGE_ExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
+{
+	const FGameplayEffectSpec& EffectSpec = ExecutionParams.GetOwningSpec();
+
+	FAggregatorEvaluateParameters EvaluateParameters;
+	EvaluateParameters.SourceTags = EffectSpec.CapturedSourceTags.GetAggregatedTags();
+	EvaluateParameters.TargetTags = EffectSpec.CapturedTargetTags.GetAggregatedTags();
+
+	float SourceAttackPower = 0.f;
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetWarriorDamageCapture().AttackPowerDef, EvaluateParameters, SourceAttackPower);
+
+	float BaseDamage = 0.f;
+	int32 UsedLightAttackComboCount = 0, UsedHeavyAttackComboCount = 0;
+	for (const TPair<FGameplayTag, float>& TagMagnitued : EffectSpec.SetByCallerTagMagnitudes)
+	{
+		if (TagMagnitued.Key.MatchesTagExact(WarriorGameplayTags::Shared_SetByCaller_BaseDamage))
+			BaseDamage = TagMagnitued.Value;
+
+		if (TagMagnitued.Key.MatchesTagExact(WarriorGameplayTags::Player_SetByCaller_AttackType_Light))
+			UsedLightAttackComboCount = TagMagnitued.Value;
+
+		if (TagMagnitued.Key.MatchesTagExact(WarriorGameplayTags::Player_SetByCaller_AttackType_Heavy))
+			UsedHeavyAttackComboCount = TagMagnitued.Value;
+	}
+
+	float SourceDefensePower = 0.f;
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetWarriorDamageCapture().DefensePowerDef, EvaluateParameters, SourceDefensePower);
 }
