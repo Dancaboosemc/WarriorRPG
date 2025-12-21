@@ -8,7 +8,7 @@
 
 class UPawnUIComponent;
 class UHeroUIComponent;
-// This class does not need to be modified.
+// This class does not need to be modified. 
 UINTERFACE(MinimalAPI)
 class UPawnUIInterface : public UInterface
 {
