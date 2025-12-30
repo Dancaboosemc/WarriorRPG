@@ -37,6 +37,13 @@ class WARRIOR_API UBTTask_RotateToFaceTarget : public UBTTaskNode
 	virtual uint16 GetInstanceMemorySize() const override;
 	virtual FString GetStaticDescription() const override;
 	//~ End BTNode Interface
+	
+	//~ Begin BTTaskNode Interface
+	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+	//~ End BTTaskNode Interface
+
+	bool HasReachedAnglePrecision(APawn* QueryPawn, AActor* TargetActor);
 
 	UPROPERTY(EditAnywhere, Category = "Face Target")
 	float AnglePrecision; 
